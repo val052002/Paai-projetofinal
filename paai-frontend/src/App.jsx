@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom'
 import './App.css'
 
 function App() {
+  const navigate = useNavigate()
   return (
     <div className="landing">
       {/* Navbar */}
@@ -27,8 +29,8 @@ function App() {
           non-conformities, and generate detailed PDF reports — all in one place.
         </p>
         <div className="hero-buttons">
-          <button className="btn btn-primary">Sign Up</button>
-          <button className="btn btn-secondary">Sign In</button>
+          <button className="btn btn-primary" onClick={() => navigate('/signup')}>Sign Up</button>
+          <button className="btn btn-secondary" onClick={() => navigate('/signin')}>Sign In</button>
         </div>
       </section>
 
