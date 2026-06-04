@@ -63,6 +63,70 @@ export async function getAuditById(auditId, companyId) {
     [auditId]
   );
 
-  audit.responses = responsesResult.rows;
+  // Attach all 93 controls with existing responses merged in
+  const controlsResult = await pool.query(
+    `SELECT c.id, c.codigo, c.titulo, c.dominio, c.recomendacao,
+       r.id AS response_id, r.compliant, r.observation
+     FROM controlos_iso c
+     LEFT JOIN audit_responses r ON r.controlo_id = c.id AND r.audit_id = $1
+     ORDER BY c.codigo`,
+    [auditId]
+  );
+
+  audit.controls = controlsResult.rows;
   return audit;
+}
+
+export async function saveResponses(auditId, companyId, responses) {
+  // Verify audit belongs to company
+  const check = await pool.query(
+    'SELECT id, status FROM audits WHERE id = $1 AND company_id = $2',
+    [auditId, companyId]
+  );
+  if (!check.rows[0]) {
+    const err = new Error('Audit not found');
+    err.status = 404;
+    throw err;
+  }
+  if (check.rows[0].status === 'COMPLETED') {
+    const err = new Error('Audit is already finalized');
+    err.status = 400;
+    throw err;
+  }
+
+  // Upsert each response
+  for (const { controlo_id, compliant, observation } of responses) {
+    await pool.query(
+      `INSERT INTO audit_responses (audit_id, controlo_id, compliant, observation)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT (audit_id, controlo_id)
+       DO UPDATE SET compliant = $3, observation = $4`,
+      [auditId, controlo_id, compliant, observation ?? null]
+    );
+  }
+  return { saved: responses.length };
+}
+
+export async function finalizeAudit(auditId, companyId) {
+  const check = await pool.query(
+    'SELECT id, status FROM audits WHERE id = $1 AND company_id = $2',
+    [auditId, companyId]
+  );
+  if (!check.rows[0]) {
+    const err = new Error('Audit not found');
+    err.status = 404;
+    throw err;
+  }
+  if (check.rows[0].status === 'COMPLETED') {
+    const err = new Error('Audit is already finalized');
+    err.status = 400;
+    throw err;
+  }
+
+  const result = await pool.query(
+    `UPDATE audits SET status = 'COMPLETED', end_date = CURRENT_DATE
+     WHERE id = $1 RETURNING *`,
+    [auditId]
+  );
+  return result.rows[0];
 }

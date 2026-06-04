@@ -30,3 +30,23 @@ export async function getAuditById(req, res, next) {
     next(err);
   }
 }
+
+export async function saveResponses(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+  try {
+    const result = await auditService.saveResponses(req.params.id, req.company.id, req.body.responses);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function finalizeAudit(req, res, next) {
+  try {
+    const audit = await auditService.finalizeAudit(req.params.id, req.company.id);
+    res.json(audit);
+  } catch (err) {
+    next(err);
+  }
+}

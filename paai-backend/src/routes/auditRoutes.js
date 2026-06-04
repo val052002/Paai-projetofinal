@@ -16,8 +16,13 @@ router.get('/', auditController.getAudits);
 
 router.get('/:id', auditController.getAuditById);
 
-// POST /audits/:id/responses  — to be implemented with audit detail page
-// POST /audits/:id/finalize   — to be implemented
+router.post('/:id/responses',
+  body('responses').isArray({ min: 1 }).withMessage('Responses must be a non-empty array'),
+  auditController.saveResponses
+);
+
+router.post('/:id/finalize', auditController.finalizeAudit);
+
 // GET  /audits/:id/report     — to be implemented
 // GET  /audits/:id/report/pdf — to be implemented
 
