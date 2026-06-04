@@ -8,6 +8,7 @@ import SignUp from './pages/SignUp.jsx'
 import MfaSetup from './pages/MfaSetup.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import AuditDetail from './pages/AuditDetail.jsx'
+import Report from './pages/Report.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -19,6 +20,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/mfa/setup" element={<MfaSetup />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/audits/:id" element={<AuditDetail />} />
+        <Route path="/audits/:id/report" element={<Report />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

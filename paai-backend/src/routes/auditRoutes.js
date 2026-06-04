@@ -23,7 +23,7 @@ router.post('/:id/responses',
 
 router.post('/:id/finalize', auditController.finalizeAudit);
 
-// GET  /audits/:id/report     — to be implemented
-// GET  /audits/:id/report/pdf — to be implemented
+router.get('/:id/report', auditController.getReport);
+router.get('/:id/report/pdf', auditController.getReportPdf);
 
 export default router;

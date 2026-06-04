@@ -1,5 +1,6 @@
 import { validationResult } from 'express-validator';
 import * as auditService from '../services/auditService.js';
+import { generateReportPdf } from '../services/pdfService.js';
 
 export async function createAudit(req, res, next) {
   const errors = validationResult(req);
@@ -46,6 +47,24 @@ export async function finalizeAudit(req, res, next) {
   try {
     const audit = await auditService.finalizeAudit(req.params.id, req.company.id);
     res.json(audit);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getReport(req, res, next) {
+  try {
+    const report = await auditService.getReport(req.params.id, req.company.id);
+    res.json(report);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getReportPdf(req, res, next) {
+  try {
+    const report = await auditService.getReport(req.params.id, req.company.id);
+    generateReportPdf(report, res);
   } catch (err) {
     next(err);
   }

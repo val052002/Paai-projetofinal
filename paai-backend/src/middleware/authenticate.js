@@ -2,11 +2,14 @@ import jwt from 'jsonwebtoken';
 
 export default function authenticate(req, res, next) {
   const header = req.headers.authorization;
-  if (!header || !header.startsWith('Bearer ')) {
+  // Allow token via query param for PDF downloads
+  const token = (header && header.startsWith('Bearer '))
+    ? header.slice(7)
+    : req.query.token;
+
+  if (!token) {
     return res.status(401).json({ error: 'Missing or invalid authorization header' });
   }
-
-  const token = header.slice(7);
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     if (payload.mfaPending) {

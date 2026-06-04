@@ -77,6 +77,58 @@ export async function getAuditById(auditId, companyId) {
   return audit;
 }
 
+export async function getReport(auditId, companyId) {
+  const auditResult = await pool.query(
+    `SELECT a.*, c.name AS company_name, c.email AS company_email
+     FROM audits a JOIN companies c ON c.id = a.company_id
+     WHERE a.id = $1 AND a.company_id = $2`,
+    [auditId, companyId]
+  );
+  if (!auditResult.rows[0]) {
+    const err = new Error('Audit not found');
+    err.status = 404;
+    throw err;
+  }
+  const audit = auditResult.rows[0];
+
+  const controlsResult = await pool.query(
+    `SELECT c.id, c.codigo, c.titulo, c.dominio, c.recomendacao,
+       r.compliant, r.observation
+     FROM controlos_iso c
+     LEFT JOIN audit_responses r ON r.controlo_id = c.id AND r.audit_id = $1
+     ORDER BY c.codigo`,
+    [auditId]
+  );
+
+  const controls = controlsResult.rows;
+  const answered = controls.filter(c => c.compliant !== null);
+  const compliant = answered.filter(c => c.compliant === true);
+  const nonConformities = answered.filter(c => c.compliant === false);
+
+  const byDomain = {};
+  for (const c of controls) {
+    if (!byDomain[c.dominio]) byDomain[c.dominio] = { total: 0, compliant: 0, controls: [] };
+    byDomain[c.dominio].total++;
+    if (c.compliant === true) byDomain[c.dominio].compliant++;
+    byDomain[c.dominio].controls.push(c);
+  }
+
+  return {
+    audit,
+    summary: {
+      total: controls.length,
+      answered: answered.length,
+      compliant: compliant.length,
+      non_conformities: nonConformities.length,
+      compliance_pct: answered.length > 0
+        ? Math.round((compliant.length / answered.length) * 100)
+        : 0,
+    },
+    by_domain: byDomain,
+    non_conformities: nonConformities,
+  };
+}
+
 export async function saveResponses(auditId, companyId, responses) {
   // Verify audit belongs to company
   const check = await pool.query(
