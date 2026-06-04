@@ -21,6 +21,13 @@ router.post('/login',
 // Setup MFA (requires auth, no MFA yet)
 router.post('/mfa/setup', authenticate, authController.setupMfa);
 
+// Confirm MFA after scanning QR (requires auth)
+router.post('/mfa/confirm',
+  authenticate,
+  body('token').isLength({ min: 6, max: 6 }).withMessage('MFA code must be 6 digits'),
+  authController.confirmMfa
+);
+
 // Verify MFA token after login
 router.post('/mfa/verify',
   body('preToken').notEmpty().withMessage('Pre-auth token is required'),

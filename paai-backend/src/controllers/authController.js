@@ -34,6 +34,18 @@ export async function setupMfa(req, res, next) {
   }
 }
 
+export async function confirmMfa(req, res, next) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+  try {
+    const result = await authService.confirmMfa(req.company.id, req.body.token);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function verifyMfa(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });

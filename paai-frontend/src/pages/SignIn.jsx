@@ -18,7 +18,7 @@ export default function SignIn() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:7000/auth/login', {
+      const res = await fetch('http://localhost:3001/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -31,7 +31,11 @@ export default function SignIn() {
       } else {
         localStorage.setItem('token', data.token);
         localStorage.setItem('company', JSON.stringify(data.company));
-        navigate('/dashboard');
+        if (!data.mfaConfigured) {
+          navigate('/mfa/setup');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err) {
       setError(err.message);
@@ -45,7 +49,7 @@ export default function SignIn() {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:7000/auth/mfa/verify', {
+      const res = await fetch('http://localhost:3001/auth/mfa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ preToken: mfa.preToken, token: mfa.code }),

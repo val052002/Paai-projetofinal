@@ -48,7 +48,7 @@ export async function login({ email, password }) {
   }
 
   const token = issueToken(company);
-  return { mfaRequired: false, token, company: safeCompany(company) };
+  return { mfaRequired: false, mfaConfigured: !!company.mfa_secret, token, company: safeCompany(company) };
 }
 
 export async function setupMfa(companyId) {
@@ -97,6 +97,26 @@ export async function verifyMfa({ preToken, token }) {
   }
 
   return { token: issueToken(company), company: safeCompany(company) };
+}
+
+export async function confirmMfa(companyId, token) {
+  const result = await pool.query('SELECT * FROM companies WHERE id = $1', [companyId]);
+  const company = result.rows[0];
+
+  if (!company.mfa_secret) {
+    const err = new Error('MFA not configured');
+    err.status = 400;
+    throw err;
+  }
+
+  const valid = authenticator.check(token, company.mfa_secret);
+  if (!valid) {
+    const err = new Error('Invalid MFA code');
+    err.status = 401;
+    throw err;
+  }
+
+  return { verified: true };
 }
 
 function issueToken(company) {
