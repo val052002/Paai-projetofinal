@@ -22,21 +22,39 @@ cd paai
 
 ### 2. Setup the Database
 
-**Option A — pgAdmin (recommended for beginners)**
+You will use **pgAdmin** — a free visual tool that comes bundled with PostgreSQL. Think of it like a file explorer, but for your database.
 
-1. Open **pgAdmin** and connect to your PostgreSQL server
-2. Right-click **Databases** → **Create** → **Database**, name it `paai27001`, click Save
-3. Click on `paai27001` → open **Query Tool** (top menu)
-4. Click the folder icon → open `paai-backend/src/db/schema.sql` → click **Run (▶)**
-5. Click the folder icon again → open `paai-backend/src/db/seed.sql` → click **Run (▶)**
+**Step 1 — Open pgAdmin**
+- Search for **pgAdmin 4** on your computer and open it
+- It will open in your browser automatically
+- On the left side you will see a tree — click on **Servers** to expand it, then click your server (usually called `PostgreSQL`)
+- It will ask for a password — enter the password you chose when you installed PostgreSQL
 
-**Option B — Command line**
+**Step 2 — Create the database**
+- Right-click on **Databases** (in the left panel)
+- Click **Create** → **Database**
+- In the **Database** field type exactly: `paai27001`
+- Click **Save**
+- You should now see `paai27001` appear in the list on the left
 
-```bash
-psql -U postgres -c "CREATE DATABASE paai27001;"
-psql -U postgres -d paai27001 -f paai-backend/src/db/schema.sql
-psql -U postgres -d paai27001 -f paai-backend/src/db/seed.sql
-```
+**Step 3 — Open the Query Tool**
+- Click on `paai27001` to select it (it will go bold)
+- In the top menu click **Tools** → **Query Tool**
+- A text editor will open on the right side
+
+**Step 4 — Run the Schema file (creates the tables)**
+- In the Query Tool, click the **folder icon** (Open File)
+- Navigate to the project folder → `paai-backend` → `src` → `db` → select `schema.sql`
+- Click the **Run** button (▶) or press **F5**
+- You should see "Query returned successfully" at the bottom
+
+**Step 5 — Run the Seed file (loads the 93 ISO controls)**
+- Click the **folder icon** again
+- This time select `seed.sql` from the same folder
+- Click **Run (▶)** again
+- You should see "Query returned successfully"
+
+That's it! The database is ready.
 
 ### 3. Configure the Backend
 
