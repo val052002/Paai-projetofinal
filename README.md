@@ -22,14 +22,19 @@ cd paai
 
 ### 2. Setup the Database
 
+**Option A — pgAdmin (recommended for beginners)**
+
+1. Open **pgAdmin** and connect to your PostgreSQL server
+2. Right-click **Databases** → **Create** → **Database**, name it `paai27001`, click Save
+3. Click on `paai27001` → open **Query Tool** (top menu)
+4. Click the folder icon → open `paai-backend/src/db/schema.sql` → click **Run (▶)**
+5. Click the folder icon again → open `paai-backend/src/db/seed.sql` → click **Run (▶)**
+
+**Option B — Command line**
+
 ```bash
-# Create the database
 psql -U postgres -c "CREATE DATABASE paai27001;"
-
-# Run schema (creates all tables)
 psql -U postgres -d paai27001 -f paai-backend/src/db/schema.sql
-
-# Seed the 93 ISO 27001:2022 controls
 psql -U postgres -d paai27001 -f paai-backend/src/db/seed.sql
 ```
 
