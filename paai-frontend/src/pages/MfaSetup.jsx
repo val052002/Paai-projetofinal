@@ -75,13 +75,13 @@ export default function MfaSetup() {
         <div className="auth-logo">🛡 PAAI</div>
 
         {step === 'loading' && (
-          <p className="auth-sub">Setting up MFA...</p>
+          <p style={{ fontSize: 14, color: '#555' }}>Setting up MFA...</p>
         )}
 
         {step === 'scan' && (
           <>
             <h2>Set Up Two-Factor Auth</h2>
-            <p className="auth-sub">Scan this QR code with Google Authenticator or Authy</p>
+            <p style={{ fontSize: 13, color: '#555', marginBottom: 12 }}>Scan this QR code with Google Authenticator or Authy</p>
 
             {error && <div className="auth-error">{error}</div>}
 
@@ -134,9 +134,8 @@ export default function MfaSetup() {
 
         {step === 'done' && (
           <div className="mfa-done">
-            <div className="done-icon">✅</div>
-            <h2>MFA Enabled!</h2>
-            <p className="auth-sub">Redirecting to your dashboard...</p>
+            <h2>MFA Enabled</h2>
+            <p style={{ fontSize: 13, color: '#555' }}>Redirecting to your dashboard...</p>
           </div>
         )}
       </div>
