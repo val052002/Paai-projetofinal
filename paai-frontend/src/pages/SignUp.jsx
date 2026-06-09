@@ -44,9 +44,7 @@ export default function SignUp() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="auth-logo">🛡 PAAI</div>
         <h2>Create Account</h2>
-        <p className="auth-sub">Start your ISO 27001 audit journey</p>
         {error && <div className="auth-error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">

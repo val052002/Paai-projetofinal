@@ -71,9 +71,8 @@ export default function SignIn() {
     return (
       <div className="auth-page">
         <div className="auth-card">
-          <div className="auth-logo">🛡 PAAI</div>
           <h2>Two-Factor Authentication</h2>
-          <p className="auth-sub">Enter the 6-digit code from your authenticator app</p>
+          <p style={{ fontSize: 13, color: '#555', marginBottom: 16 }}>Enter the 6-digit code from your authenticator app</p>
           {error && <div className="auth-error">{error}</div>}
           <form onSubmit={handleMfa}>
             <div className="form-group">
@@ -101,9 +100,7 @@ export default function SignIn() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <div className="auth-logo">🛡 PAAI</div>
         <h2>Sign In</h2>
-        <p className="auth-sub">Access your audit platform</p>
         {error && <div className="auth-error">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
