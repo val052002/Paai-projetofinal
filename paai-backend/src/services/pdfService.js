@@ -8,117 +8,142 @@ export function generateReportPdf(report, res) {
   res.setHeader('Content-Disposition', `attachment; filename="audit-${audit.id}-report.pdf"`);
   doc.pipe(res);
 
-  const blue   = '#2563eb';
-  const dark   = '#0f172a';
-  const gray   = '#64748b';
-  const red    = '#dc2626';
-  const green  = '#059669';
-  const yellow = '#d97706';
-  const W = 495;
+  const black = '#111111';
+  const dark  = '#333333';
+  const gray  = '#666666';
+  const light = '#999999';
+  const rule  = '#cccccc';
+  const bg    = '#f5f5f5';
+  const W     = 495;
 
   // ── Header ──
-  doc.rect(0, 0, 595, 90).fill(blue);
-  doc.fill('#fff').fontSize(22).font('Helvetica-Bold').text('PAAI', 50, 28);
-  doc.fontSize(11).font('Helvetica').text('ISO 27001 Audit Report', 50, 55);
-  doc.fontSize(9).text(`${audit.company_name}  ·  ${audit.company_email}`, 50, 70);
-  doc.moveDown(0);
+  doc.rect(0, 0, 595, 80).fill(bg);
+  doc.fill(black).fontSize(20).font('Helvetica-Bold').text('PAAI', 50, 24);
+  doc.fill(gray).fontSize(10).font('Helvetica').text('ISO 27001 Audit Report', 50, 50);
+  doc.moveTo(50, 80).lineTo(545, 80).stroke(rule);
 
-  // ── Audit Info ──
-  doc.y = 110;
-  doc.fill(dark).fontSize(16).font('Helvetica-Bold').text(audit.title, 50, 110);
-  doc.fontSize(9).font('Helvetica').fill(gray)
-    .text(`Started: ${new Date(audit.start_date).toLocaleDateString('en-GB')}   |   Status: ${audit.status}`, 50, 132);
+  // ── Audit title & meta ──
+  doc.fill(black).fontSize(14).font('Helvetica-Bold').text(audit.title, 50, 100);
+  doc.fill(gray).fontSize(9).font('Helvetica')
+    .text(
+      `${audit.company_name}  ·  ${audit.company_email}  ·  Started: ${new Date(audit.start_date).toLocaleDateString('en-GB')}  ·  Status: ${audit.status}`,
+      50, 120, { width: W }
+    );
 
-  // ── Summary boxes ──
+  // ── Divider ──
+  doc.moveTo(50, 140).lineTo(545, 140).stroke(rule);
+
+  // ── Summary stats row ──
   const stats = [
-    { label: 'Total Controls', value: summary.total, color: dark },
-    { label: 'Answered',       value: summary.answered, color: blue },
-    { label: 'Compliant',      value: summary.compliant, color: green },
-    { label: 'Non-Conformities', value: summary.non_conformities, color: red },
-    { label: 'Compliance Rate', value: `${summary.compliance_pct}%`, color: summary.compliance_pct >= 70 ? green : red },
+    { label: 'Total Controls',    value: String(summary.total) },
+    { label: 'Assessed',          value: String(summary.answered) },
+    { label: 'Compliant',         value: String(summary.compliant) },
+    { label: 'Non-Conformities',  value: String(summary.non_conformities) },
+    { label: 'Compliance Rate',   value: `${summary.compliance_pct}%` },
   ];
 
   const boxW = 88;
+  const boxH = 48;
+  const by0  = 152;
   let bx = 50;
-  const by = 155;
+
   for (const s of stats) {
-    doc.roundedRect(bx, by, boxW, 52, 4).fill('#f8fafc').stroke('#e2e8f0');
-    doc.fill(s.color).fontSize(18).font('Helvetica-Bold').text(String(s.value), bx, by + 8, { width: boxW, align: 'center' });
-    doc.fill(gray).fontSize(7.5).font('Helvetica').text(s.label, bx, by + 34, { width: boxW, align: 'center' });
+    doc.rect(bx, by0, boxW, boxH).fill('#ffffff').stroke(rule);
+    doc.fill(black).fontSize(16).font('Helvetica-Bold')
+      .text(s.value, bx, by0 + 8, { width: boxW, align: 'center' });
+    doc.fill(light).fontSize(7).font('Helvetica')
+      .text(s.label, bx, by0 + 30, { width: boxW, align: 'center' });
     bx += boxW + 8;
   }
 
-  doc.y = 225;
-
   // ── Compliance bar ──
-  doc.moveDown(0.5);
-  doc.fill(dark).fontSize(11).font('Helvetica-Bold').text('Compliance Overview', 50);
-  doc.moveDown(0.3);
-  doc.rect(50, doc.y, W, 12).fill('#e2e8f0');
+  const barTop = by0 + boxH + 18;
+  doc.fill(dark).fontSize(10).font('Helvetica-Bold').text('Compliance Overview', 50, barTop);
+
+  const barY = barTop + 16;
+  doc.rect(50, barY, W, 10).fill('#e5e5e5');
   const fillW = Math.round((summary.compliance_pct / 100) * W);
-  doc.rect(50, doc.y - 12, fillW, 12).fill(summary.compliance_pct >= 70 ? green : red);
+  if (fillW > 0) doc.rect(50, barY, fillW, 10).fill('#222222');
   doc.fill(gray).fontSize(8).font('Helvetica')
-    .text(`${summary.compliance_pct}% compliant  (${summary.compliant}/${summary.answered} answered controls)`, 50, doc.y + 2);
-  doc.moveDown(1.2);
+    .text(
+      `${summary.compliance_pct}% compliant  (${summary.compliant} of ${summary.answered} assessed controls)`,
+      50, barY + 14, { width: W }
+    );
 
   // ── By Domain ──
-  doc.fill(dark).fontSize(11).font('Helvetica-Bold').text('Results by Domain');
-  doc.moveDown(0.4);
+  const domainTop = barY + 36;
+  doc.moveTo(50, domainTop - 4).lineTo(545, domainTop - 4).stroke(rule);
+  doc.fill(dark).fontSize(10).font('Helvetica-Bold').text('Results by Domain', 50, domainTop);
 
+  let y = domainTop + 16;
   const domainOrder = ['Organizacional', 'Pessoas', 'Físico', 'Tecnológico'];
+
   for (const domain of domainOrder) {
     const d = by_domain[domain];
     if (!d) continue;
     const pct = d.total > 0 ? Math.round((d.compliant / d.total) * 100) : 0;
-    const color = pct >= 70 ? green : pct >= 40 ? yellow : red;
 
-    doc.fill(dark).fontSize(9.5).font('Helvetica-Bold').text(`${domain}`, 50, doc.y, { continued: true });
-    doc.fill(color).font('Helvetica').text(`  ${pct}%  (${d.compliant}/${d.total})`, { align: 'right' });
+    doc.fill(dark).fontSize(9).font('Helvetica-Bold').text(domain, 50, y);
+    doc.fill(gray).font('Helvetica').text(`${pct}%  (${d.compliant}/${d.total})`, 0, y, { align: 'right', width: 545 });
 
-    const barY = doc.y + 2;
-    doc.rect(50, barY, W, 7).fill('#e2e8f0');
-    doc.rect(50, barY, Math.round((pct / 100) * W), 7).fill(color);
-    doc.moveDown(0.9);
+    const dBarY = y + 13;
+    doc.rect(50, dBarY, W, 6).fill('#e5e5e5');
+    const dFillW = Math.round((pct / 100) * W);
+    if (dFillW > 0) doc.rect(50, dBarY, dFillW, 6).fill('#444444');
+
+    y += 30;
   }
 
-  doc.moveDown(0.5);
-
   // ── Non-Conformities ──
+  y += 6;
+  doc.moveTo(50, y).lineTo(545, y).stroke(rule);
+  y += 10;
+
   if (non_conformities.length > 0) {
-    if (doc.y > 650) doc.addPage();
-    doc.fill(dark).fontSize(11).font('Helvetica-Bold').text('Non-Conformities & Recommendations');
-    doc.moveDown(0.4);
+    if (y > 650) { doc.addPage(); y = 50; }
+    doc.fill(dark).fontSize(10).font('Helvetica-Bold')
+      .text(`Non-Conformities  (${non_conformities.length})`, 50, y);
+    y += 18;
 
     for (const nc of non_conformities) {
-      if (doc.y > 700) doc.addPage();
+      if (y > 690) { doc.addPage(); y = 50; }
 
-      doc.roundedRect(50, doc.y, W, 8).fill('#fee2e2');
-      doc.fill(red).fontSize(9).font('Helvetica-Bold')
-        .text(`${nc.codigo} — ${nc.titulo}`, 55, doc.y + 10);
-      doc.moveDown(0.3);
+      // control code + title
+      doc.fill(dark).fontSize(9).font('Helvetica-Bold')
+        .text(`${nc.codigo}`, 50, y, { continued: true });
+      doc.fill(gray).font('Helvetica')
+        .text(`  —  ${nc.titulo}`, { width: W });
+      y = doc.y + 4;
 
+      // observation
       if (nc.observation) {
-        doc.fill(gray).fontSize(8.5).font('Helvetica')
-          .text(`Observation: ${nc.observation}`, 55, doc.y, { width: W - 10 });
-        doc.moveDown(0.3);
+        doc.fill(gray).fontSize(8).font('Helvetica-Bold').text('Observation:', 50, y);
+        y = doc.y + 2;
+        doc.fill(dark).font('Helvetica').text(nc.observation, 50, y, { width: W });
+        y = doc.y + 4;
       }
 
-      doc.fill(yellow).fontSize(8.5).font('Helvetica-Bold').text('Recommendation:', 55, doc.y);
-      doc.fill('#78350f').font('Helvetica').fontSize(8.5)
-        .text(nc.recomendacao, 55, doc.y + 11, { width: W - 10 });
-      doc.moveDown(1.2);
+      // recommendation
+      doc.fill(gray).fontSize(8).font('Helvetica-Bold').text('Recommendation:', 50, y);
+      y = doc.y + 2;
+      doc.fill(dark).font('Helvetica').text(nc.recomendacao, 50, y, { width: W });
+      y = doc.y + 10;
+
+      // separator line between items
+      doc.moveTo(50, y).lineTo(545, y).stroke('#eeeeee');
+      y += 8;
     }
   } else {
-    doc.fill(green).fontSize(10).font('Helvetica-Bold')
-      .text('✓ No non-conformities identified. Full compliance achieved.', 50);
+    doc.fill(dark).fontSize(9).font('Helvetica')
+      .text('No non-conformities identified. Full compliance achieved.', 50, y);
+    y = doc.y;
   }
 
   // ── Footer ──
-  const pages = doc.bufferedPageRange ? doc.bufferedPageRange() : { count: 1 };
-  doc.fontSize(7.5).fill(gray).font('Helvetica')
+  doc.fill(light).fontSize(7.5).font('Helvetica')
     .text(
-      `Generated by PAAI · ${new Date().toLocaleDateString('en-GB')}`,
-      50, 800, { align: 'center', width: W }
+      `Generated by PAAI  ·  ${new Date().toLocaleDateString('en-GB')}`,
+      50, 810, { align: 'center', width: W }
     );
 
   doc.end();
