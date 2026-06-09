@@ -128,7 +128,7 @@ export default function AuditDetail() {
       {/* Navbar */}
       <nav className="dash-nav">
         <div className="nav-logo" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
-          🛡 PAAI
+          PAAI
         </div>
         <div className="nav-right">
           <span className="nav-company">{company.name}</span>

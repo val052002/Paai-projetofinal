@@ -72,7 +72,7 @@ export default function MfaSetup() {
   return (
     <div className="auth-page">
       <div className="auth-card mfa-setup-card">
-        <div className="auth-logo">🛡 PAAI</div>
+        <div className="auth-logo">PAAI</div>
 
         {step === 'loading' && (
           <p style={{ fontSize: 14, color: '#555' }}>Setting up MFA...</p>

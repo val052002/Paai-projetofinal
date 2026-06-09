@@ -76,7 +76,7 @@ export default function Dashboard() {
     <div className="dashboard">
       {/* Navbar */}
       <nav className="dash-nav">
-        <div className="nav-logo">🛡 PAAI</div>
+        <div className="nav-logo">PAAI</div>
         <div className="nav-right">
           <span className="nav-company">{company.name}</span>
           <button className="btn-logout" onClick={logout}>Sign Out</button>
