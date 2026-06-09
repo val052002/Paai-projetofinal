@@ -53,7 +53,6 @@ export default function Report() {
   if (!report) return null;
 
   const { audit, summary, by_domain, non_conformities } = report;
-  const complianceColor = summary.compliance_pct >= 70 ? 'green' : summary.compliance_pct >= 40 ? 'yellow' : 'red';
 
   return (
     <div className="report-page">
@@ -89,7 +88,7 @@ export default function Report() {
               </p>
             </div>
             <button className="btn-pdf" onClick={downloadPdf}>
-              ⬇ Download PDF
+              Download PDF
             </button>
           </div>
         </div>
@@ -97,7 +96,7 @@ export default function Report() {
         {error && <div className="report-error">{error}</div>}
 
         {/* Compliance Score */}
-        <div className={`score-card ${complianceColor}`}>
+        <div className="score-card">
           <div className="score-circle">
             <span className="score-num">{summary.compliance_pct}%</span>
             <span className="score-label">Compliance</span>
@@ -145,13 +144,12 @@ export default function Report() {
               const d = by_domain[domain];
               if (!d) return null;
               const pct = d.total > 0 ? Math.round((d.compliant / d.total) * 100) : 0;
-              const color = pct >= 70 ? 'green' : pct >= 40 ? 'yellow' : 'red';
               return (
-                <div key={domain} className={`domain-card ${color}`}>
+                <div key={domain} className="domain-card">
                   <div className="domain-name">{domain}</div>
-                  <div className={`domain-pct ${color}`}>{pct}%</div>
+                  <div className="domain-pct">{pct}%</div>
                   <div className="domain-bar">
-                    <div className={`domain-fill ${color}`} style={{ width: `${pct}%` }} />
+                    <div className="domain-fill" style={{ width: `${pct}%` }} />
                   </div>
                   <div className="domain-counts">{d.compliant}/{d.total} compliant</div>
                 </div>
@@ -169,7 +167,6 @@ export default function Report() {
 
           {non_conformities.length === 0 ? (
             <div className="nc-empty">
-              <span className="nc-empty-icon">✅</span>
               <p>No non-conformities identified. Full compliance achieved.</p>
             </div>
           ) : (
@@ -200,10 +197,10 @@ export default function Report() {
         {/* Footer actions */}
         <div className="report-footer-actions">
           <button className="btn-back" onClick={() => navigate('/dashboard')}>
-            ← Back to Dashboard
+            Back to Dashboard
           </button>
           <button className="btn-pdf" onClick={downloadPdf}>
-            ⬇ Download PDF Report
+            Download PDF Report
           </button>
         </div>
       </div>
