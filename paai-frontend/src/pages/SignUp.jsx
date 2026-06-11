@@ -7,6 +7,8 @@ export default function SignUp() {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   function handleChange(e) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -52,7 +54,7 @@ export default function SignUp() {
             <input
               type="text"
               name="name"
-              placeholder="Acme Corp"
+              placeholder="Your Company Name"
               value={form.name}
               onChange={handleChange}
               required
@@ -71,25 +73,35 @@ export default function SignUp() {
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Min. 8 characters"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
+            <div className="pw-wrap">
+              <input
+                type={showPw ? 'text' : 'password'}
+                name="password"
+                placeholder="Min. 8 characters"
+                value={form.password}
+                onChange={handleChange}
+                required
+              />
+              <button type="button" className="pw-toggle" onClick={() => setShowPw(v => !v)}>
+                {showPw ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
           <div className="form-group">
             <label>Confirm Password</label>
-            <input
-              type="password"
-              name="confirm"
-              placeholder="Repeat password"
-              value={form.confirm}
-              onChange={handleChange}
-              required
-            />
+            <div className="pw-wrap">
+              <input
+                type={showConfirm ? 'text' : 'password'}
+                name="confirm"
+                placeholder="Repeat password"
+                value={form.confirm}
+                onChange={handleChange}
+                required
+              />
+              <button type="button" className="pw-toggle" onClick={() => setShowConfirm(v => !v)}>
+                {showConfirm ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
           <button className="btn-submit" disabled={loading}>
             {loading ? 'Creating account...' : 'Sign Up'}

@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Auth.css';
 
+
 export default function SignIn() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: '', password: '' });
   const [mfa, setMfa] = useState({ required: false, preToken: '', code: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPw, setShowPw] = useState(false);
 
   function handleChange(e) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -117,14 +119,19 @@ export default function SignIn() {
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
+            <div className="pw-wrap">
+              <input
+                type={showPw ? 'text' : 'password'}
+                name="password"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={handleChange}
+                required
+              />
+              <button type="button" className="pw-toggle" onClick={() => setShowPw(v => !v)}>
+                {showPw ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
           <button className="btn-submit" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'}
