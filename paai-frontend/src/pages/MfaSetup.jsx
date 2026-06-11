@@ -60,6 +60,7 @@ export default function MfaSetup() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Invalid code');
+      localStorage.removeItem('mfa_pending');
       setStep('done');
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (err) {

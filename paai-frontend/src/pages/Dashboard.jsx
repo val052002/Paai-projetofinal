@@ -18,6 +18,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!token) return navigate('/signin');
+    if (localStorage.getItem('mfa_pending')) return navigate('/mfa/setup');
     fetchAudits();
   }, []);
 
