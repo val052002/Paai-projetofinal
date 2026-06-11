@@ -54,7 +54,7 @@ export default function SignUp() {
             <input
               type="text"
               name="name"
-              placeholder="Your Company Name"
+              placeholder=""
               value={form.name}
               onChange={handleChange}
               required
