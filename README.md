@@ -79,6 +79,10 @@ DB_PASSWORD=your_postgres_password
 JWT_SECRET=any_long_random_string
 JWT_MFA_SECRET=another_long_random_string
 
+# To generate secure random strings, run this in your terminal:
+# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# Run it twice — once for JWT_SECRET, once for JWT_MFA_SECRET
+
 FRONTEND_URL=http://localhost:5173
 ```
 
