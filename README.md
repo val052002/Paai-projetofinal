@@ -16,7 +16,7 @@ A secure web platform for performing internal ISO 27001:2022 audits. Assess all 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/val052002/paai.git
+git clone https://github.com/val052002/Paai-projetofinal.git
 cd paai
 ```
 
