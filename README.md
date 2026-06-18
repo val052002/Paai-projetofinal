@@ -58,12 +58,14 @@ That's it! The database is ready.
 
 ### 3. Configure the Backend
 
+Create a `.env` file inside `paai-backend`:
+
 ```bash
 cd paai-backend
-cp .env.example .env
+touch .env
 ```
 
-Edit `.env` and fill in your values:
+Fill it with these values:
 
 ```env
 PORT=3001
