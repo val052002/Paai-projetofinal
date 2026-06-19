@@ -65,7 +65,7 @@ export default function MfaSetup() {
     }
   }
 
-  if (step === 'loading') return null;
+  if (step === 'loading') return <div style={{ minHeight: '100vh', background: '#f5f5f5' }} />;
 
   return (
     <div className="auth-page">
