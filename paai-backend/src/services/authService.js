@@ -76,12 +76,14 @@ export async function setupMfa(companyId) {
   const otpauth = authenticator.keyuri(company.email, "PAAI", secret);
   const qrDataUrl = await qrcode.toDataURL(otpauth);
 
-  await pool.query("UPDATE companies SET mfa_secret = $1 WHERE id = $2", [
-    secret,
-    companyId,
-  ]);
+  // Store secret in a short-lived token — only save to DB after user confirms
+  const setupToken = jwt.sign(
+    { companyId, mfaSetup: true, secret },
+    process.env.JWT_MFA_SECRET,
+    { expiresIn: "10m" }
+  );
 
-  return { qrDataUrl, secret };
+  return { qrDataUrl, secret, setupToken };
 }
 
 export async function verifyMfa({ preToken, token }) {
@@ -115,23 +117,47 @@ export async function verifyMfa({ preToken, token }) {
   return { token: issueToken(company), company: safeCompany(company) };
 }
 
-export async function confirmMfa(companyId, token) {
-  const result = await pool.query("SELECT * FROM companies WHERE id = $1", [
-    companyId,
-  ]);
-  const company = result.rows[0];
+export async function confirmMfa(companyId, token, setupToken) {
+  let secret;
 
-  if (!company.mfa_secret) {
-    const err = new Error("MFA not configured");
-    err.status = 400;
-    throw err;
+  if (setupToken) {
+    // First-time setup — verify the setupToken and extract the secret
+    let payload;
+    try {
+      payload = jwt.verify(setupToken, process.env.JWT_MFA_SECRET);
+    } catch {
+      const err = new Error("Setup session expired, please restart MFA setup");
+      err.status = 400;
+      throw err;
+    }
+    if (!payload.mfaSetup || payload.companyId !== companyId) {
+      const err = new Error("Invalid setup token");
+      err.status = 400;
+      throw err;
+    }
+    secret = payload.secret;
+  } else {
+    // Already has secret in DB
+    const result = await pool.query("SELECT * FROM companies WHERE id = $1", [companyId]);
+    const company = result.rows[0];
+    if (!company.mfa_secret) {
+      const err = new Error("MFA not configured");
+      err.status = 400;
+      throw err;
+    }
+    secret = company.mfa_secret;
   }
 
-  const valid = authenticator.check(token, company.mfa_secret);
+  const valid = authenticator.check(token, secret);
   if (!valid) {
     const err = new Error("Invalid MFA code");
     err.status = 401;
     throw err;
+  }
+
+  // Save secret to DB only after successful confirmation
+  if (setupToken) {
+    await pool.query("UPDATE companies SET mfa_secret = $1 WHERE id = $2", [secret, companyId]);
   }
 
   return { verified: true };

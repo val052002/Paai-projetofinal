@@ -7,6 +7,7 @@ export default function MfaSetup() {
   const navigate = useNavigate();
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [secret, setSecret] = useState('');
+  const [setupToken, setSetupToken] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,6 +35,7 @@ export default function MfaSetup() {
       }
       setQrDataUrl(data.qrDataUrl);
       setSecret(data.secret);
+      setSetupToken(data.setupToken);
       setStep('scan');
     } catch (err) {
       setError(err.message);
@@ -53,7 +55,7 @@ export default function MfaSetup() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ token: code }),
+        body: JSON.stringify({ token: code, setupToken }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Invalid code');

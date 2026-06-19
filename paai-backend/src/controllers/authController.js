@@ -39,7 +39,7 @@ export async function confirmMfa(req, res, next) {
   if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
 
   try {
-    const result = await authService.confirmMfa(req.company.id, req.body.token);
+    const result = await authService.confirmMfa(req.company.id, req.body.token, req.body.setupToken);
     res.json(result);
   } catch (err) {
     next(err);
