@@ -6,8 +6,9 @@ const API = 'http://localhost:3001';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const company = JSON.parse(localStorage.getItem('company') || '{}');
   const token = localStorage.getItem('token');
+  let company = {};
+  try { company = JSON.parse(localStorage.getItem('company') || '{}'); } catch { company = {}; }
 
   const [audits, setAudits] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,7 +29,7 @@ export default function Dashboard() {
       });
       if (res.status === 401) { logout(); return; }
       const data = await res.json();
-      setAudits(data);
+      setAudits(Array.isArray(data) ? data : []);
     } catch {
       setError('Failed to load audits');
     } finally {
@@ -59,7 +60,9 @@ export default function Dashboard() {
   }
 
   function logout() {
-    localStorage.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('company');
+    sessionStorage.removeItem('mfa_setup_session');
     navigate('/signin');
   }
 

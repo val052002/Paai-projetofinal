@@ -25,7 +25,7 @@ export default function Report() {
       const res = await fetch(`${API}/audits/${id}/report`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.status === 401) { localStorage.clear(); navigate('/signin'); return; }
+      if (res.status === 401) { localStorage.removeItem('token'); localStorage.removeItem('company'); sessionStorage.removeItem('mfa_setup_session'); navigate('/signin'); return; }
       if (res.status === 404) { navigate('/dashboard'); return; }
       const data = await res.json();
       setReport(data);
@@ -63,7 +63,7 @@ export default function Report() {
         </div>
         <div className="nav-right">
           <span className="nav-company">{company.name}</span>
-          <button className="btn-logout" onClick={() => { localStorage.clear(); navigate('/signin'); }}>
+          <button className="btn-logout" onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('company'); sessionStorage.removeItem('mfa_setup_session'); navigate('/signin'); }}>
             Sign Out
           </button>
         </div>

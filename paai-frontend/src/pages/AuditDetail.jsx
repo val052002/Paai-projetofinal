@@ -31,7 +31,7 @@ export default function AuditDetail() {
       const res = await fetch(`${API}/audits/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.status === 401) { localStorage.clear(); navigate('/signin'); return; }
+      if (res.status === 401) { localStorage.removeItem('token'); localStorage.removeItem('company'); sessionStorage.removeItem('mfa_setup_session'); navigate('/signin'); return; }
       if (res.status === 404) { navigate('/dashboard'); return; }
       const data = await res.json();
       setAudit(data);
@@ -131,7 +131,7 @@ export default function AuditDetail() {
         </div>
         <div className="nav-right">
           <span className="nav-company">{company.name}</span>
-          <button className="btn-logout" onClick={() => { localStorage.clear(); navigate('/signin'); }}>
+          <button className="btn-logout" onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('company'); sessionStorage.removeItem('mfa_setup_session'); navigate('/signin'); }}>
             Sign Out
           </button>
         </div>

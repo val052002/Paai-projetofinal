@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import './Auth.css';
 import './MfaSetup.css';
 
+const SESSION_KEY = 'mfa_setup_session';
+
 export default function MfaSetup() {
   const navigate = useNavigate();
   const [qrDataUrl, setQrDataUrl] = useState('');
@@ -11,11 +13,27 @@ export default function MfaSetup() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState('loading'); // loading | scan | done
+  const [step, setStep] = useState('loading');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return navigate('/signin');
+
+    // If a setup session exists from a previous load (e.g. page refresh), reuse it
+    const saved = sessionStorage.getItem(SESSION_KEY);
+    if (saved) {
+      try {
+        const { qrDataUrl, secret, setupToken } = JSON.parse(saved);
+        setQrDataUrl(qrDataUrl);
+        setSecret(secret);
+        setSetupToken(setupToken);
+        setStep('scan');
+        return;
+      } catch {
+        sessionStorage.removeItem(SESSION_KEY);
+      }
+    }
+
     fetchQr(token);
   }, []);
 
@@ -27,19 +45,23 @@ export default function MfaSetup() {
       });
       const data = await res.json();
       if (!res.ok) {
-        if (res.status === 400) {
-          localStorage.removeItem('mfa_pending');
-          return navigate('/dashboard');
-        }
+        if (res.status === 400) return navigate('/dashboard');
+        if (res.status === 401) { localStorage.clear(); return navigate('/signin'); }
         throw new Error(data.error || 'Failed to load MFA setup');
       }
+      // Persist setup session so page refresh reuses same QR
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+        qrDataUrl: data.qrDataUrl,
+        secret: data.secret,
+        setupToken: data.setupToken,
+      }));
       setQrDataUrl(data.qrDataUrl);
       setSecret(data.secret);
       setSetupToken(data.setupToken);
       setStep('scan');
     } catch (err) {
       setError(err.message);
-      setStep('scan');
+      setStep('error');
     }
   }
 
@@ -58,8 +80,22 @@ export default function MfaSetup() {
         body: JSON.stringify({ token: code, setupToken }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Invalid code');
-      localStorage.removeItem('mfa_pending');
+      if (!res.ok) {
+        // setupToken expired — clear session and restart
+        if (res.status === 400 && data.error && data.error.includes('expired')) {
+          sessionStorage.removeItem(SESSION_KEY);
+          setError('Setup session expired. Generating a new QR code...');
+          setTimeout(() => {
+            setStep('loading');
+            setError('');
+            const authToken = localStorage.getItem('token');
+            if (authToken) fetchQr(authToken);
+          }, 2000);
+          return;
+        }
+        throw new Error(data.error || 'Invalid code');
+      }
+      sessionStorage.removeItem(SESSION_KEY);
       setStep('done');
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (err) {
@@ -75,11 +111,19 @@ export default function MfaSetup() {
     </div>
   );
 
+  if (step === 'error') return (
+    <div className="auth-page">
+      <div className="auth-card">
+        <p style={{ color: '#c00', fontSize: 13, marginBottom: 16 }}>{error}</p>
+        <button className="btn-submit" onClick={() => navigate('/signin')}>Back to Sign In</button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="auth-page">
       <div className="auth-card mfa-setup-card">
         <div className="auth-logo">PAAI</div>
-
 
         {step === 'scan' && (
           <>
