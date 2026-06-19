@@ -34,7 +34,6 @@ export default function SignIn() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('company', JSON.stringify(data.company));
         if (!data.mfaConfigured) {
-          localStorage.setItem('mfa_pending', '1');
           navigate('/mfa/setup');
         } else {
           navigate('/dashboard');

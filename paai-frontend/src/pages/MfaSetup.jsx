@@ -67,7 +67,11 @@ export default function MfaSetup() {
     }
   }
 
-  if (step === 'loading') return <div style={{ minHeight: '100vh', background: '#f5f5f5' }} />;
+  if (step === 'loading') return (
+    <div style={{ minHeight: '100vh', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Arial', color: '#888', fontSize: 14 }}>
+      Loading...
+    </div>
+  );
 
   return (
     <div className="auth-page">
