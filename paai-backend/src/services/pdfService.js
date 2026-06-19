@@ -16,13 +16,11 @@ export function generateReportPdf(report, res) {
   const bg    = '#f5f5f5';
   const W     = 495;
 
-  // ── Header ──
   doc.rect(0, 0, 595, 80).fill(bg);
   doc.fill(black).fontSize(20).font('Helvetica-Bold').text('PAAI', 50, 24);
   doc.fill(gray).fontSize(10).font('Helvetica').text('Relatório de Auditoria ISO 27001', 50, 50);
   doc.moveTo(50, 80).lineTo(545, 80).stroke(rule);
 
-  // ── Audit title & meta ──
   doc.fill(black).fontSize(14).font('Helvetica-Bold').text(audit.title, 50, 100);
   doc.fill(gray).fontSize(9).font('Helvetica')
     .text(
@@ -30,10 +28,8 @@ export function generateReportPdf(report, res) {
       50, 120, { width: W }
     );
 
-  // ── Divider ──
   doc.moveTo(50, 140).lineTo(545, 140).stroke(rule);
 
-  // ── Summary stats row ──
   const stats = [
     { label: 'Total de Controlos', value: String(summary.total) },
     { label: 'Avaliados',          value: String(summary.answered) },
@@ -56,7 +52,6 @@ export function generateReportPdf(report, res) {
     bx += boxW + 8;
   }
 
-  // ── Compliance bar ──
   const barTop = by0 + boxH + 18;
   doc.fill(dark).fontSize(10).font('Helvetica-Bold').text('Visão Geral de Conformidade', 50, barTop);
 
@@ -70,7 +65,6 @@ export function generateReportPdf(report, res) {
       50, barY + 14, { width: W }
     );
 
-  // ── By Domain ──
   const domainTop = barY + 36;
   doc.moveTo(50, domainTop - 4).lineTo(545, domainTop - 4).stroke(rule);
   doc.fill(dark).fontSize(10).font('Helvetica-Bold').text('Resultados por Domínio', 50, domainTop);
@@ -94,7 +88,6 @@ export function generateReportPdf(report, res) {
     y += 30;
   }
 
-  // ── Non-Conformities ──
   y += 6;
   doc.moveTo(50, y).lineTo(545, y).stroke(rule);
   y += 10;
@@ -108,14 +101,12 @@ export function generateReportPdf(report, res) {
     for (const nc of non_conformities) {
       if (y > 690) { doc.addPage(); y = 50; }
 
-      // control code + title
       doc.fill(dark).fontSize(9).font('Helvetica-Bold')
         .text(`${nc.codigo}`, 50, y, { continued: true });
       doc.fill(gray).font('Helvetica')
         .text(`  —  ${nc.titulo}`, { width: W });
       y = doc.y + 4;
 
-      // observation
       if (nc.observation) {
         doc.fill(gray).fontSize(8).font('Helvetica-Bold').text('Observação:', 50, y);
         y = doc.y + 2;
@@ -123,13 +114,11 @@ export function generateReportPdf(report, res) {
         y = doc.y + 4;
       }
 
-      // recommendation
       doc.fill(gray).fontSize(8).font('Helvetica-Bold').text('Recomendação:', 50, y);
       y = doc.y + 2;
       doc.fill(dark).font('Helvetica').text(nc.recomendacao, 50, y, { width: W });
       y = doc.y + 10;
 
-      // separator line between items
       doc.moveTo(50, y).lineTo(545, y).stroke('#eeeeee');
       y += 8;
     }
@@ -139,7 +128,6 @@ export function generateReportPdf(report, res) {
     y = doc.y;
   }
 
-  // ── Footer ──
   doc.fill(light).fontSize(7.5).font('Helvetica')
     .text(
       `Gerado por PAAI  ·  ${new Date().toLocaleDateString('pt-PT')}`,

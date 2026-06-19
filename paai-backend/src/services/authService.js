@@ -43,7 +43,6 @@ export async function login({ email, password }) {
   }
 
   if (company.mfa_secret) {
-    // MFA enabled — issue a short-lived pre-auth token
     const preToken = jwt.sign(
       { companyId: company.id, mfaPending: true },
       process.env.JWT_MFA_SECRET,

@@ -44,11 +44,6 @@ export default function MfaSetup() {
     setError('');
     setLoading(true);
     try {
-      // Verify the code using the pre-auth flow — here we verify directly
-      // by logging in again won't work, so we verify the TOTP against secret client-side
-      // Instead we hit a dedicated confirm endpoint — for now use mfa/verify with a temp preToken
-      // The correct approach: login again to get preToken, then verify
-      // Better: add a /auth/mfa/confirm endpoint that takes token + jwt
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:3001/auth/mfa/confirm', {
         method: 'POST',

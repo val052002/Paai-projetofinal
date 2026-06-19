@@ -36,7 +36,6 @@ export default function AuditDetail() {
       const data = await res.json();
       setAudit(data);
 
-      // Build responses map from existing data
       const map = {};
       data.controls.forEach(c => {
         if (c.response_id) {
