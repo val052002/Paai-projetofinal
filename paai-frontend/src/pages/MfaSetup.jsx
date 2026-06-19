@@ -26,8 +26,10 @@ export default function MfaSetup() {
       });
       const data = await res.json();
       if (!res.ok) {
-        // MFA already configured — go to dashboard
-        if (res.status === 400) return navigate('/dashboard');
+        if (res.status === 400) {
+          localStorage.removeItem('mfa_pending');
+          return navigate('/dashboard');
+        }
         throw new Error(data.error || 'Failed to load MFA setup');
       }
       setQrDataUrl(data.qrDataUrl);

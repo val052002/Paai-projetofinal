@@ -62,6 +62,7 @@ export default function SignIn() {
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('company', JSON.stringify(data.company));
+      localStorage.removeItem('mfa_pending');
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
